@@ -1,0 +1,641 @@
+<title>Password Night</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one centered phone-width column; the current word card and the +1 button are the heroes. */
+:root {
+  /* Default scheme: Midnight Peach */
+  --bg: #111827; --surface: #1b2438; --surface-2: #26314a; --line: #33405c;
+  --fg: #f4f1ec; --muted: #a7b0c3;
+  --accent: #ff9f7a; --on-accent: #2a1208; --accent-soft: rgba(255,159,122,.16);
+  --good: #7fd6a6; --on-good: #0b2a1b;
+  --font-display: "Outfit", "Avenir Next", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --r-lg: 28px; --r-md: 18px; --r-pill: 999px;
+  color-scheme: dark;
+}
+:root[data-scheme="mocha"] {
+  --bg: #f5eee8; --surface: #fffaf6; --surface-2: #efe3d9; --line: #e0cfc1;
+  --fg: #2b1e19; --muted: #6f5a4f;
+  --accent: #8a5a44; --on-accent: #fff7f2; --accent-soft: rgba(138,90,68,.12);
+  --good: #3f7a5a; --on-good: #ffffff; color-scheme: light;
+}
+:root[data-scheme="lavender"] {
+  --bg: #f2f0fa; --surface: #ffffff; --surface-2: #e8e4f7; --line: #d9d3ef;
+  --fg: #1e1a33; --muted: #5d5878;
+  --accent: #5b3fd6; --on-accent: #ffffff; --accent-soft: rgba(91,63,214,.12);
+  --good: #23855f; --on-good: #ffffff; color-scheme: light;
+}
+:root[data-scheme="sage"] {
+  --bg: #edf1ea; --surface: #fbfcf9; --surface-2: #e0e8dc; --line: #cfdac9;
+  --fg: #1b2a21; --muted: #536559;
+  --accent: #2d6a4c; --on-accent: #ffffff; --accent-soft: rgba(45,106,76,.12);
+  --good: #b9822a; --on-good: #ffffff; color-scheme: light;
+}
+:root[data-scheme="arcade"] {
+  --bg: #140f1f; --surface: #211934; --surface-2: #2e2447; --line: #40335f;
+  --fg: #f7f3ff; --muted: #b3a8cf;
+  --accent: #ff5c9e; --on-accent: #2b0716; --accent-soft: rgba(255,92,158,.16);
+  --good: #42e0cf; --on-good: #062a26; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 12px 40px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .25s ease, color .25s ease;
+}
+.app { max-width: 520px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+p { margin: 0; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+button:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+input { font: inherit; }
+
+/* Header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.logo {
+  width: 38px; height: 38px; border-radius: 12px; background: var(--accent); color: var(--on-accent);
+  display: grid; place-items: center; font-family: var(--font-display); font-weight: 800; font-size: 18px; flex: none;
+}
+.brand h1 { font-size: 21px; font-weight: 700; line-height: 1.1; }
+.top-actions { display: flex; gap: 8px; align-items: center; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: var(--r-pill);
+  background: var(--surface); border: 1px solid var(--line); font-size: 12.5px; font-weight: 600; color: var(--muted); white-space: nowrap;
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.pill.live .dot { background: var(--good); box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 25%, transparent); }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: 1px solid var(--line);
+  display: grid; place-items: center;
+}
+.icon-btn svg { width: 20px; height: 20px; stroke: var(--fg); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Cards & sections */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+
+/* Inputs */
+.names { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field input {
+  width: 100%; padding: 12px 16px; border-radius: var(--r-md); border: 1px solid var(--line);
+  background: var(--surface-2); color: var(--fg); font-weight: 600;
+}
+
+/* Segmented control */
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--surface-2); padding: 5px; border-radius: var(--r-pill); gap: 4px; }
+.seg button { padding: 10px 8px; border-radius: var(--r-pill); font-weight: 600; font-size: 14.5px; color: var(--muted); transition: background .15s, color .15s; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+
+/* Category chips */
+.cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.chip {
+  padding: 14px 8px; border-radius: var(--r-md); background: var(--surface-2); border: 2px solid transparent;
+  font-family: var(--font-display); font-weight: 600; font-size: 15.5px; text-align: center; transition: border-color .15s, background .15s;
+}
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.hint { font-size: 13.5px; color: var(--muted); }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 16px 22px; border-radius: var(--r-pill); font-family: var(--font-display); font-weight: 700; font-size: 18px;
+  background: var(--accent); color: var(--on-accent); transition: transform .08s ease, filter .15s;
+}
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn.block { width: 100%; }
+.btn.ghost { background: var(--surface-2); color: var(--fg); }
+.btn.good { background: var(--good); color: var(--on-good); }
+.btn.small { padding: 10px 16px; font-size: 15px; }
+.linkish { color: var(--muted); font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; padding: 6px; }
+
+/* Play: word card */
+.status { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.status h2 { font-size: 20px; }
+.word-card {
+  background: var(--accent); color: var(--on-accent); border-radius: 32px; padding: 22px 22px 26px;
+  display: flex; flex-direction: column; gap: 6px; text-align: center; position: relative; overflow: hidden;
+}
+.word-card .label { color: inherit; opacity: .75; }
+.the-word { font-family: var(--font-display); font-weight: 800; font-size: clamp(36px, 11vw, 56px); line-height: 1.05; overflow-wrap: anywhere; padding-block: 6px; }
+.cover {
+  position: absolute; inset: 0; background: var(--accent); display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 700; font-size: 18px; border-radius: inherit;
+}
+.counter-wrap { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 14px; }
+.plus {
+  width: 140px; height: 140px; border-radius: 50%; background: var(--surface); border: 3px solid var(--accent);
+  font-family: var(--font-display); font-weight: 800; font-size: 44px; color: var(--fg);
+  box-shadow: 0 10px 30px -12px var(--accent); transition: transform .06s ease; touch-action: manipulation;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1;
+}
+.plus span { font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 6px; font-family: var(--font-body); }
+.plus:active { transform: scale(.94); }
+.stat { text-align: center; }
+.stat b { display: block; font-family: var(--font-display); font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat small { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.bump { animation: bump .18s ease; }
+@keyframes bump { 50% { transform: scale(1.18); } }
+
+.actions { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+
+/* Word list */
+.list { display: flex; flex-direction: column; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.list li {
+  display: grid; grid-template-columns: 28px 1fr auto; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 14px; background: var(--surface-2); font-weight: 500;
+}
+.list li .n { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.list li .w { min-width: 0; overflow-wrap: anywhere; }
+.list li .c { font-variant-numeric: tabular-nums; font-weight: 700; font-family: var(--font-display); }
+.list li.done .w { color: var(--muted); }
+.list li.now { background: var(--accent-soft); outline: 2px solid var(--accent); }
+.list li.locked .w { color: var(--muted); letter-spacing: .2em; }
+
+/* Progress dots */
+.dots { display: flex; gap: 6px; justify-content: center; }
+.dots i { width: 22px; height: 6px; border-radius: 3px; background: var(--line); }
+.dots i.done { background: var(--good); }
+.dots i.now { background: var(--accent); }
+
+/* Guesser */
+.listen { text-align: center; padding-block: 18px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.listen .big { font-family: var(--font-display); font-weight: 800; font-size: 96px; line-height: 1; font-variant-numeric: tabular-nums; color: var(--accent); }
+
+/* Summary */
+.total { text-align: center; display: flex; flex-direction: column; gap: 4px; padding-block: 8px; }
+.total .big { font-family: var(--font-display); font-size: 84px; font-weight: 800; line-height: 1; color: var(--accent); font-variant-numeric: tabular-nums; }
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar { display: grid; grid-template-columns: minmax(0, 1fr) 2fr 32px; align-items: center; gap: 10px; font-size: 14.5px; }
+.bar .track { height: 12px; border-radius: 6px; background: var(--surface-2); overflow: hidden; }
+.bar .fill { height: 100%; border-radius: 6px; background: var(--accent); }
+.bar .w { overflow-wrap: anywhere; font-weight: 500; }
+.bar .c { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+.highlights { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hl { background: var(--surface-2); border-radius: var(--r-md); padding: 12px 14px; min-width: 0; }
+.hl b { display: block; font-family: var(--font-display); font-size: 18px; overflow-wrap: anywhere; }
+
+.history { display: flex; flex-direction: column; gap: 6px; }
+.history div { display: flex; justify-content: space-between; gap: 10px; font-size: 14.5px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.history div:last-child { border-bottom: 0; }
+.history b { font-variant-numeric: tabular-nums; font-family: var(--font-display); }
+
+/* Theme sheet */
+.schemes { display: grid; grid-template-columns: 1fr; gap: 8px; }
+.scheme {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 10px 14px;
+  border-radius: var(--r-md); background: var(--surface-2); border: 2px solid transparent; text-align: left;
+}
+.scheme[aria-pressed="true"] { border-color: var(--accent); }
+.swatch { display: flex; }
+.swatch i { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--surface); margin-left: -6px; }
+.swatch i:first-child { margin-left: 0; }
+.scheme small { display: block; color: var(--muted); font-size: 12.5px; }
+.scheme b { font-family: var(--font-display); font-weight: 600; }
+
+.sheet-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 30; display: flex; align-items: flex-end; justify-content: center; }
+.sheet {
+  width: 100%; max-width: 560px; background: var(--surface); border-radius: 28px 28px 0 0;
+  padding: 20px max(16px, env(safe-area-inset-left, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 14px; max-height: 88vh; overflow-y: auto;
+}
+.sheet-head { display: flex; justify-content: space-between; align-items: center; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+  background: var(--fg); color: var(--bg); padding: 12px 18px; border-radius: var(--r-pill); font-weight: 600; font-size: 14px;
+  z-index: 40; max-width: calc(100% - 32px); text-align: center;
+}
+.loading { text-align: center; padding: 40px 10px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+.spinner { width: 34px; height: 34px; border-radius: 50%; border: 4px solid var(--surface-2); border-top-color: var(--accent); animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.rules { font-size: 14.5px; color: var(--muted); padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+
+@media (max-width: 380px) {
+  .cats { grid-template-columns: repeat(2, 1fr); }
+  .plus { width: 120px; height: 120px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand"><div class="logo" aria-hidden="true">P</div><h1>Password Night</h1></div>
+    <div class="top-actions">
+      <span class="pill" id="sync"><span class="dot"></span><span id="syncText">Solo</span></span>
+      <button class="icon-btn" id="themeBtn" aria-label="Change colors">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="16" cy="10" r="1.3"/><path d="M12 21a3 3 0 0 1 0-6h2a3 3 0 0 0 3-3"/></svg>
+      </button>
+    </div>
+  </header>
+  <main id="view"></main>
+</div>
+<div id="sheetRoot"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ---------- Word bank ---------- */
+const CATEGORIES = [
+  { id: "classic", name: "Classic" },
+  { id: "christmas", name: "Christmas" },
+  { id: "halloween", name: "Halloween" },
+  { id: "y2000s", name: "2000s" },
+  { id: "y2010s", name: "2010s" },
+  { id: "disney", name: "Disney" },
+];
+const DIFFS = [
+  { id: "easy", name: "Easy", hint: "Everyday things: dog, pizza, rainbow" },
+  { id: "medium", name: "Medium", hint: "Trickier: volcano, passport, hammock" },
+  { id: "hard", name: "Hard", hint: "Ideas and oddballs: nostalgia, irony, loophole" },
+];
+const BANK = {
+  classic: {
+    easy: ["apple","chair","ocean","pizza","dog","rain","bicycle","guitar","moon","sandwich","pillow","rainbow","kitchen","soccer","candle","butterfly","doctor","island","camera","cookie","train","garden","banana","shoe","window","birthday","beach","clock","horse","toothbrush"],
+    medium: ["umbrella","volcano","passport","lighthouse","telescope","avalanche","cactus","orchestra","compass","hammock","tornado","library","skeleton","microscope","igloo","waterfall","bakery","magnet","saddle","eclipse","parachute","museum","submarine","trampoline","blizzard","dentist","pyramid","jellyfish","scarecrow","fireworks"],
+    hard: ["nostalgia","bureaucracy","ambiguous","irony","procrastinate","paradox","etiquette","metaphor","momentum","integrity","cynical","serendipity","hierarchy","loophole","melancholy","sarcasm","compromise","inertia","jealousy","deadline","intuition","symmetry","gossip","karma","leverage","dilemma","awkward","bias","folklore","humble"],
+  },
+  christmas: {
+    easy: ["snowman","reindeer","stocking","candy cane","sleigh","elf","gift","snowflake","mittens","chimney","ornament","Santa","cookies","bells","star","presents"],
+    medium: ["mistletoe","eggnog","wreath","nutcracker","tinsel","fruitcake","caroling","poinsettia","chestnuts","advent calendar","ugly sweater","North Pole","Rudolph","workshop","wrapping paper","hot cocoa"],
+    hard: ["Scrooge","frankincense","Bethlehem","regifting","yule log","Krampus","Boxing Day","sugarplum","Silent Night","nativity","figgy pudding","Grinch","Feliz Navidad","white elephant","solstice","Nutcracker ballet"],
+  },
+  halloween: {
+    easy: ["pumpkin","ghost","witch","candy","bat","spider","costume","skeleton","broom","mask","vampire","moon","owl","monster"],
+    medium: ["haunted house","cauldron","werewolf","mummy","graveyard","trick-or-treat","scarecrow","cobweb","jack-o'-lantern","zombie","black cat","potion","coffin","candy corn"],
+    hard: ["poltergeist","séance","Frankenstein","exorcism","banshee","Ouija board","apple bobbing","Salem","crypt","phantom","possessed","Dracula","gargoyle","Hocus Pocus"],
+  },
+  y2000s: {
+    easy: ["iPod","flip phone","MySpace","Shrek","Harry Potter","DVD","Nemo","Xbox","SpongeBob","texting","American Idol","Hannah Montana","Nintendo DS","Blockbuster"],
+    medium: ["Y2K","BlackBerry","Napster","Razr","Livestrong bracelet","Juicy Couture","Paris Hilton","The Office","Wii","Guitar Hero","frosted tips","Crocs","LimeWire","Lost"],
+    hard: ["Friendster","Napoleon Dynamite","T9 texting","Von Dutch","trucker hat","low-rise jeans","Bluetooth headset","Ed Hardy","Webkinz","Bratz","Zune","Heelys","Laguna Beach","Hey Ya"],
+  },
+  y2010s: {
+    easy: ["Instagram","selfie","Frozen","Minecraft","emoji","iPad","Snapchat","Fortnite","Uber","Netflix","hoverboard","Despacito","Taylor Swift","FaceTime"],
+    medium: ["Vine","fidget spinner","Pokémon Go","ice bucket challenge","planking","the dab","Game of Thrones","Harlem Shake","Gangnam Style","Angry Birds","Flappy Bird","YOLO","bottle flip","Tinder"],
+    hard: ["Kony 2012","The Dress","Tide Pods","mannequin challenge","Harambe","Candy Crush","pumpkin spice","Hotline Bling","Grumpy Cat","Doge","Yanny or Laurel","Netflix and chill","on fleek","Area 51 raid"],
+  },
+  disney: {
+    easy: ["Mickey Mouse","Cinderella","Nemo","Simba","Elsa","castle","Goofy","Ariel","Dumbo","Pinocchio","Toy Story","Stitch","Snow White","Donald Duck"],
+    medium: ["Rapunzel","Moana","Aladdin","Genie","Pumbaa","Mufasa","Olaf","Tinker Bell","Belle","Ratatouille","Monsters Inc","fairy godmother","Sebastian","Buzz Lightyear"],
+    hard: ["Rafiki","Maleficent","Hakuna Matata","Bibbidi-Bobbidi-Boo","Cruella","Ursula","Zazu","Gaston","Jiminy Cricket","Fantasia","Epcot","Hercules","Tiana","Sorcerer's Apprentice"],
+  },
+};
+const SCHEMES = [
+  { id: "midnight", name: "Midnight Peach", note: "Dark navy, warm peach", sw: ["#111827","#26314a","#ff9f7a","#7fd6a6"] },
+  { id: "mocha", name: "Mocha Mousse", note: "Soft latte browns", sw: ["#f5eee8","#efe3d9","#8a5a44","#3f7a5a"] },
+  { id: "lavender", name: "Lavender Haze", note: "Light lilac, deep violet", sw: ["#f2f0fa","#e8e4f7","#5b3fd6","#23855f"] },
+  { id: "sage", name: "Sage Garden", note: "Calm greens, honey gold", sw: ["#edf1ea","#e0e8dc","#2d6a4c","#b9822a"] },
+  { id: "arcade", name: "Neon Arcade", note: "Game-show pink and teal", sw: ["#140f1f","#2e2447","#ff5c9e","#42e0cf"] },
+];
+
+/* ---------- Helpers ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("pw:" + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("pw:" + k, JSON.stringify(v)); } catch {} },
+};
+const DEVICE = store.get("device", null) || (() => { const id = Math.random().toString(36).slice(2, 10); store.set("device", id); return id; })();
+function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+let toastTimer;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (t.hidden = true), 3200); }
+const catName = (id) => (CATEGORIES.find((c) => c.id === id) || {}).name || id;
+const diffName = (id) => (DIFFS.find((d) => d.id === id) || {}).name || id;
+
+/* ---------- State ---------- */
+// Shared game state (synced across phones when possible)
+function freshGame() {
+  return {
+    rev: 0, writer: DEVICE, phase: "setup",
+    players: ["Player 1", "Player 2"], giver: 0,
+    category: "classic", difficulty: "easy", source: "bank",
+    words: [], idx: 0, rounds: [], used: [], dealing: false,
+  };
+}
+let game = freshGame();
+// Per-device settings
+let local = {
+  seat: store.get("seat", "shared"), // "0", "1" or "shared"
+  scheme: store.get("scheme", "midnight"),
+  peek: false,
+};
+document.documentElement.dataset.scheme = local.scheme;
+
+/* ---------- Sync (claude db) ---------- */
+let db = null, docRef = null, synced = false, writing = Promise.resolve(), writeTimer = null, pendingRev = 0;
+function setSync(state) {
+  const pill = $("#sync"); const txt = $("#syncText");
+  pill.classList.toggle("live", state === "live");
+  txt.textContent = state === "live" ? "Synced" : state === "connecting" ? "Linking…" : "Solo";
+}
+async function initSync() {
+  try {
+    db = await window.claude?.use?.("db");
+  } catch { db = null; }
+  if (!db) { setSync("local"); return; }
+  setSync("connecting");
+  docRef = db.doc("games/table");
+  const timer = setTimeout(() => { if (!synced) setSync("local"); }, 10000);
+  docRef.onSnapshot((snap) => {
+    if (!snap.metadata?.fromCache) { clearTimeout(timer); synced = true; setSync("live"); }
+    if (!snap.exists) return;
+    const d = snap.data();
+    if (!d || typeof d.rev !== "number") return;
+    if (d.rev > game.rev || (d.rev === game.rev && d.writer !== game.writer && d.writer !== DEVICE)) {
+      if (snap.metadata?.hasPendingWrites) return;
+      game = Object.assign(freshGame(), d);
+      render();
+    }
+  }, () => { clearTimeout(timer); synced = false; setSync("local"); });
+}
+function commit() {
+  game.rev += 1; game.writer = DEVICE;
+  render();
+  if (!docRef) return;
+  clearTimeout(writeTimer);
+  writeTimer = setTimeout(() => {
+    const snapshot = JSON.parse(JSON.stringify(game));
+    writing = writing.then(() => docRef.set(snapshot)).catch((e) => {
+      if (e && (e.code === "permission_denied" || e.code === "not_granted")) {
+        toast("This phone can only watch. Ask the owner to share the game with you as a Contributor.");
+      }
+    });
+  }, 200);
+}
+
+/* ---------- Word dealing ---------- */
+let sample = null;
+async function initSample() {
+  try { sample = await window.claude?.use?.("sample"); } catch { sample = null; }
+  if (game.phase === "setup") render();
+}
+function dealFromBank() {
+  const pool = BANK[game.category][game.difficulty];
+  let fresh = pool.filter((w) => !game.used.includes(w));
+  if (fresh.length < 10) { game.used = game.used.filter((w) => !pool.includes(w)); fresh = pool.slice(); }
+  return shuffle(fresh).slice(0, 10);
+}
+async function dealFromClaude() {
+  const diffText = { easy: "easy: common, concrete words anyone could get in a couple of clues", medium: "medium: well-known but trickier, needs some creative clues", hard: "hard: abstract ideas, niche references or words that are tough to hint at" }[game.difficulty];
+  const prompt = `You are writing cards for the party game Password, where one player gives short spoken clues so their partner says the exact target word.
+Category: ${catName(game.category)}. Difficulty: ${diffText}.
+Give 10 different target words or short phrases (1 to 3 words each) that fit the category and difficulty, are family-friendly, and are fun to clue.
+Do not use any of these: ${game.used.slice(-120).join(", ") || "(none)"}.
+Reply with only a JSON array of 10 strings.`;
+  const out = await sample.json(prompt, { modelTier: "quick", cache: false });
+  const list = Array.isArray(out) ? out.filter((w) => typeof w === "string" && w.trim()).map((w) => w.trim().slice(0, 40)) : [];
+  if (list.length < 10) throw { code: "short" };
+  return list.slice(0, 10);
+}
+async function deal() {
+  if (game.dealing) return;
+  let words;
+  if (game.source === "claude" && sample) {
+    game.dealing = true; commit();
+    try { words = await dealFromClaude(); }
+    catch (e) {
+      words = dealFromBank();
+      toast(e && e.code === "not_granted" ? "Claude wasn't allowed, so these words come from the built-in list." : "Couldn't get fresh words, so these come from the built-in list.");
+    }
+  } else {
+    words = dealFromBank();
+  }
+  game.words = words.map((w) => ({ w, count: 0, done: false }));
+  game.used = game.used.concat(words);
+  game.idx = 0; game.phase = "play"; game.dealing = false; local.peek = false;
+  commit();
+}
+
+/* ---------- Actions ---------- */
+function tap(n) {
+  const cur = game.words[game.idx]; if (!cur) return;
+  cur.count = Math.max(0, cur.count + n);
+  commit();
+  const b = $("#curCount"); if (b) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); }
+  if (n > 0 && navigator.vibrate) { try { navigator.vibrate(12); } catch {} }
+}
+function gotIt() {
+  const cur = game.words[game.idx]; if (!cur) return;
+  cur.done = true; local.peek = false;
+  if (game.idx < game.words.length - 1) { game.idx += 1; commit(); return; }
+  const total = game.words.reduce((s, w) => s + w.count, 0);
+  game.rounds.push({ player: game.players[game.giver], category: game.category, difficulty: game.difficulty, total, words: game.words.map(({ w, count }) => ({ w, count })) });
+  game.phase = "summary";
+  commit();
+}
+function nextRound() { game.giver = game.giver ? 0 : 1; deal(); }
+function toSetup() { game.phase = "setup"; game.words = []; commit(); }
+
+/* ---------- Views ---------- */
+function role() {
+  if (local.seat === "shared") return "shared";
+  return Number(local.seat) === game.giver ? "giver" : "guesser";
+}
+function setupView() {
+  const seatOpts = [["0", esc(game.players[0])], ["1", esc(game.players[1])], ["shared", "Shared"]];
+  const diff = DIFFS.find((d) => d.id === game.difficulty);
+  return `
+  <section class="card">
+    <span class="label">Players</span>
+    <div class="names">
+      <label class="field"><span class="hint">Player 1</span><input id="p0" maxlength="16" value="${esc(game.players[0])}" autocomplete="off"></label>
+      <label class="field"><span class="hint">Player 2</span><input id="p1" maxlength="16" value="${esc(game.players[1])}" autocomplete="off"></label>
+    </div>
+    <span class="label">Whose device is this?</span>
+    <div class="seg" role="group" aria-label="Whose device">${seatOpts.map(([v, n]) => `<button data-seat="${v}" aria-pressed="${local.seat === v}">${n}</button>`).join("")}</div>
+    <p class="hint">Pick your name on your own phone. The phone switches between the word list and the guessing screen by itself each round. Pick Shared if you're passing one device back and forth.</p>
+  </section>
+
+  <section class="card">
+    <span class="label">Category</span>
+    <div class="cats">${CATEGORIES.map((c) => `<button class="chip" data-cat="${c.id}" aria-pressed="${game.category === c.id}">${c.name}</button>`).join("")}</div>
+    <span class="label">Difficulty</span>
+    <div class="seg" role="group" aria-label="Difficulty">${DIFFS.map((d) => `<button data-diff="${d.id}" aria-pressed="${game.difficulty === d.id}">${d.name}</button>`).join("")}</div>
+    <p class="hint">${esc(diff.hint)}</p>
+    ${sample ? `
+    <span class="label">Where words come from</span>
+    <div class="seg" role="group" aria-label="Word source">
+      <button data-src="bank" aria-pressed="${game.source === "bank"}">Built-in list</button>
+      <button data-src="claude" aria-pressed="${game.source === "claude"}">Fresh from Claude</button>
+    </div>
+    <p class="hint">${game.source === "claude" ? "Claude writes a new set of 10 every round, skipping words you've already played tonight." : "Instant, works offline. No repeats until the list runs out."}</p>` : ""}
+  </section>
+
+  <button class="btn block" id="dealBtn" ${game.dealing ? "disabled" : ""}>${game.dealing ? "Getting words…" : `Deal 10 words · ${esc(game.players[game.giver])} gives clues`}</button>
+  <div class="row" style="justify-content:center"><button class="linkish" id="swapGiver">Switch who goes first</button></div>
+  ${historyCard()}
+  ${rulesCard()}`;
+}
+function rulesCard() {
+  return `<section class="card"><span class="label">House rules</span>
+  <ul class="rules">
+    <li>Tap +1 for every word you say, including "um" if you're being strict.</li>
+    <li>No "rhymes with" or "sounds like", and no saying part of the word.</li>
+    <li>No acting it out. Just words.</li>
+    <li>Lowest total for the 10 words is the best round.</li>
+  </ul></section>`;
+}
+function historyCard() {
+  if (!game.rounds.length) return "";
+  return `<section class="card"><div class="status"><span class="label">Tonight's rounds</span><button class="linkish" id="clearHist">Clear</button></div>
+  <div class="history">${game.rounds.map((r, i) => `<div><span>${i + 1}. ${esc(r.player)} · ${esc(catName(r.category))} · ${esc(diffName(r.difficulty))}</span><b>${r.total} words</b></div>`).join("")}</div></section>`;
+}
+function dotsHtml() {
+  return `<div class="dots" aria-label="Word ${game.idx + 1} of ${game.words.length}">${game.words.map((w, i) => `<i class="${w.done ? "done" : i === game.idx ? "now" : ""}"></i>`).join("")}</div>`;
+}
+function playView() {
+  if (game.dealing || !game.words.length) return `<div class="loading"><div class="spinner"></div><p class="muted">Getting 10 words…</p></div>`;
+  const r = role();
+  const cur = game.words[game.idx];
+  const total = game.words.reduce((s, w) => s + w.count, 0);
+  const giverName = esc(game.players[game.giver]);
+  const meta = `${esc(catName(game.category))} · ${esc(diffName(game.difficulty))}`;
+  if (r === "guesser") {
+    const solved = game.words.filter((w) => w.done);
+    return `
+    <div class="status"><h2>Your turn to guess</h2><span class="pill">${meta}</span></div>
+    <section class="card listen">
+      <span class="label">Listen to ${giverName}</span>
+      <div class="big" id="curCount">${cur.count}</div>
+      <p class="muted">words on word ${game.idx + 1} of ${game.words.length}</p>
+      ${dotsHtml()}
+    </section>
+    <section class="card">
+      <div class="status"><span class="label">You got</span><span class="muted small">${total} words so far</span></div>
+      ${solved.length ? `<ul class="list">${solved.map((w, i) => `<li class="done"><span class="n">${i + 1}</span><span class="w">${esc(w.w)}</span><span class="c">${w.count}</span></li>`).join("")}</ul>` : `<p class="muted small">Words you guess show up here.</p>`}
+    </section>`;
+  }
+  const hidden = r === "shared" && !local.peek;
+  return `
+  <div class="status"><h2>${giverName} gives clues</h2><span class="pill">${meta}</span></div>
+  ${dotsHtml()}
+  <section class="word-card">
+    <span class="label">Word ${game.idx + 1} of ${game.words.length}</span>
+    <div class="the-word">${esc(cur.w)}</div>
+    ${hidden ? `<button class="cover" id="peek">Tap to see the word<br><small style="font-weight:500;font-size:14px;opacity:.8">Guesser, look away</small></button>` : ""}
+  </section>
+  <div class="counter-wrap">
+    <div class="stat"><b id="curCount">${cur.count}</b><small>this word</small></div>
+    <button class="plus" id="plus" aria-label="Add one word">+1<span>word said</span></button>
+    <div class="stat"><b>${total}</b><small>round total</small></div>
+  </div>
+  <div class="actions">
+    <button class="btn ghost" id="minus" ${cur.count ? "" : "disabled"}>Undo</button>
+    <button class="btn good" id="got">Got it</button>
+  </div>
+  <section class="card">
+    <div class="status"><span class="label">Your 10 words</span>${r === "shared" ? `<button class="linkish" id="hide">${local.peek ? "Hide words" : ""}</button>` : ""}</div>
+    <ul class="list">${game.words.map((w, i) => {
+      const cls = w.done ? "done" : i === game.idx ? "now" : hidden ? "locked" : "";
+      const txt = hidden && !w.done ? "••••••" : esc(w.w);
+      return `<li class="${cls}"><span class="n">${i + 1}</span><span class="w">${txt}</span><span class="c">${w.done || i === game.idx ? w.count : ""}</span></li>`;
+    }).join("")}</ul>
+  </section>
+  <div class="row" style="justify-content:center"><button class="linkish" id="quit">End round and go back</button></div>`;
+}
+function summaryView() {
+  const last = game.rounds[game.rounds.length - 1];
+  if (!last) return setupView();
+  const max = Math.max(1, ...last.words.map((w) => w.count));
+  const sorted = last.words.slice().sort((a, b) => a.count - b.count);
+  const avg = (last.total / last.words.length).toFixed(1);
+  const nextName = esc(game.players[game.giver ? 0 : 1]);
+  return `
+  <section class="card total">
+    <span class="label">${esc(last.player)} · ${esc(catName(last.category))} · ${esc(diffName(last.difficulty))}</span>
+    <div class="big">${last.total}</div>
+    <p class="muted">words for 10 · about ${avg} per word</p>
+  </section>
+  <div class="highlights">
+    <div class="hl"><span class="label">Smoothest</span><b>${esc(sorted[0].w)}</b><span class="muted small">${sorted[0].count} ${sorted[0].count === 1 ? "word" : "words"}</span></div>
+    <div class="hl"><span class="label">Toughest</span><b>${esc(sorted[sorted.length - 1].w)}</b><span class="muted small">${sorted[sorted.length - 1].count} ${sorted[sorted.length - 1].count === 1 ? "word" : "words"}</span></div>
+  </div>
+  <section class="card">
+    <span class="label">Word by word</span>
+    <div class="bars">${last.words.map((w) => `<div class="bar"><span class="w">${esc(w.w)}</span><span class="track"><span class="fill" style="display:block;width:${(w.count / max) * 100}%"></span></span><span class="c">${w.count}</span></div>`).join("")}</div>
+  </section>
+  <button class="btn block" id="nextRound">Next round · ${nextName} gives clues</button>
+  <button class="btn block ghost" id="toSetup">Change category or difficulty</button>
+  ${historyCard()}`;
+}
+
+function render() {
+  const v = $("#view");
+  const active = document.activeElement && document.activeElement.id;
+  v.innerHTML = `<div class="app" style="padding:0">${game.phase === "play" ? playView() : game.phase === "summary" ? summaryView() : setupView()}</div>`;
+  if (active === "p0" || active === "p1") { const el = $("#" + active); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+  bind();
+}
+function bind() {
+  const on = (sel, fn) => { const el = $(sel); if (el) el.addEventListener("click", fn); };
+  document.querySelectorAll("[data-seat]").forEach((b) => b.addEventListener("click", () => { local.seat = b.dataset.seat; store.set("seat", local.seat); render(); }));
+  document.querySelectorAll("[data-cat]").forEach((b) => b.addEventListener("click", () => { game.category = b.dataset.cat; commit(); }));
+  document.querySelectorAll("[data-diff]").forEach((b) => b.addEventListener("click", () => { game.difficulty = b.dataset.diff; commit(); }));
+  document.querySelectorAll("[data-src]").forEach((b) => b.addEventListener("click", () => { game.source = b.dataset.src; commit(); }));
+  ["p0", "p1"].forEach((id, i) => {
+    const el = $("#" + id); if (!el) return;
+    let t;
+    el.addEventListener("input", () => { clearTimeout(t); t = setTimeout(() => { game.players[i] = el.value.trim() || `Player ${i + 1}`; commit(); }, 500); });
+  });
+  on("#dealBtn", deal);
+  on("#swapGiver", () => { game.giver = game.giver ? 0 : 1; commit(); });
+  on("#clearHist", () => { game.rounds = []; game.used = []; commit(); toast("Cleared tonight's rounds"); });
+  on("#plus", () => tap(1));
+  on("#minus", () => tap(-1));
+  on("#got", gotIt);
+  on("#peek", () => { local.peek = true; render(); });
+  on("#hide", () => { local.peek = false; render(); });
+  on("#quit", toSetup);
+  on("#nextRound", nextRound);
+  on("#toSetup", toSetup);
+}
+
+/* ---------- Theme sheet ---------- */
+function openThemes() {
+  const root = $("#sheetRoot");
+  const draw = () => {
+    root.innerHTML = `<div class="sheet-backdrop" id="backdrop"><div class="sheet" role="dialog" aria-label="Color schemes">
+      <div class="sheet-head"><h3>Colors</h3><button class="btn small ghost" id="closeSheet">Done</button></div>
+      <p class="hint">Each phone keeps its own choice. Tap one to try it.</p>
+      <div class="schemes">${SCHEMES.map((s) => `<button class="scheme" data-scheme="${s.id}" aria-pressed="${local.scheme === s.id}">
+        <span class="swatch">${s.sw.map((c) => `<i style="background:${c}"></i>`).join("")}</span>
+        <span><b>${s.name}</b><small>${s.note}</small></span>
+        <span class="muted small">${local.scheme === s.id ? "On" : ""}</span></button>`).join("")}</div>
+    </div></div>`;
+    root.querySelectorAll("[data-scheme]").forEach((b) => b.addEventListener("click", () => {
+      local.scheme = b.dataset.scheme; store.set("scheme", local.scheme);
+      document.documentElement.dataset.scheme = local.scheme; draw();
+    }));
+    $("#closeSheet").addEventListener("click", () => (root.innerHTML = ""));
+    $("#backdrop").addEventListener("click", (e) => { if (e.target.id === "backdrop") root.innerHTML = ""; });
+  };
+  draw();
+}
+$("#themeBtn").addEventListener("click", openThemes);
+
+/* ---------- Boot ---------- */
+function start(saved) {
+  if (saved && saved.game) game = Object.assign(freshGame(), saved.game);
+  render();
+  initSync();
+  initSample();
+}
+window.claude?.hot?.snapshot?.(() => ({ game }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
